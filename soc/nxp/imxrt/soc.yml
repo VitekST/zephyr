@@ -38,6 +38,7 @@ family:
     - name: mimxrt685s
       cpuclusters:
       - name: cm33
+      - name: hifi4
 runners:
   run_once:
     '--erase':
