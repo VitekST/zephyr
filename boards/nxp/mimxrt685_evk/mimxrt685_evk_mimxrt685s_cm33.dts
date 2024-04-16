@@ -33,6 +33,7 @@
 		magn0 = &fxos8700;
 		accel0 = &fxos8700;
 		sdhc0 = &usdhc0;
+		mbox = &mbox;
 	};
 
 	chosen {
@@ -394,5 +395,9 @@ zephyr_udc0: &usbhs {
 
 /* Disable this node if not using USB and need another MPU region */
 &sram1 {
+	status = "okay";
+};
+
+&mbox {
 	status = "okay";
 };
