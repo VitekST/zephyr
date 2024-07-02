@@ -69,9 +69,57 @@
 			drive-strength = "normal";
 		};
 	};
+
+	pinmux_flexcomm1_i2s: pinmux_flexcomm1_i2s {
+		group0 {
+			pinmux = <FC1_RXD_SDA_MOSI_DATA_PIO0_9>;
+			input-enable;
+			slew-rate = "normal";
+			drive-strength = "high";
+		};
+	};
+
+	pinmux_flexcomm3_i2s: pinmux_flexcomm3_i2s {
+		group0 {
+			pinmux = <FC3_RXD_SDA_MOSI_DATA_PIO0_23>,
+				<FC3_TXD_SCL_MISO_WS_PIO0_22>,
+				<FC3_SCK_PIO0_21>;
+			input-enable;
+			slew-rate = "normal";
+			drive-strength = "high";
+		};
+	};
+
+	pinmux_codec: pinmux_codec {
+		group0 {
+			pinmux = <MCLK_PIO1_10>;
+			slew-rate = "normal";
+			drive-strength = "high";
+		};
+	};
+
+	pinmux_i3c: pinmux_i3c {
+		group0 {
+			pinmux = <I3C0_SCL_PIO2_29>,
+				<I3C0_SDA_PIO2_30>;
+			input-enable;
+			slew-rate = "slow";
+			drive-strength = "high";
+		};
+
+		group1 {
+			pinmux = <I3C0_PUR_PIO2_31>;
+			slew-rate = "normal";
+			drive-strength = "normal";
+		};
+	};
 };
 
 &gpio0 {
+	status = "okay";
+};
+
+&dma1 {
 	status = "okay";
 };
 
@@ -85,4 +133,44 @@
 
 &mbox {
 	status = "okay";
+};
+/* I2S receive channel */
+i2s0: &flexcomm1 {
+	status = "okay";
+	compatible = "nxp,lpc-i2s";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	dmas = <&dma1 2>;
+	dma-names = "rx";
+	pinctrl-0 = <&pinmux_flexcomm1_i2s>;
+	pinctrl-names = "default";
+};
+
+/* I2S transmit channel */
+i2s1: &flexcomm3 {
+	status = "okay";
+	compatible = "nxp,lpc-i2s";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	dmas = <&dma1 7>;
+	dma-names = "tx";
+	pinctrl-0 = <&pinmux_flexcomm3_i2s>;
+	pinctrl-names = "default";
+};
+
+&i3c0 {
+	status = "okay";
+	pinctrl-0 = <&pinmux_i3c>;
+	pinctrl-names = "default";
+
+	audio_codec: wm8904@1a {
+		pinctrl-0 = <&pinmux_codec>;
+		pinctrl-names = "default";
+		compatible = "wolfson,wm8904";
+		reg = <0x1a 0 0>;
+		clock-source = "MCLK";
+
+		clocks = <&clkctl0 MCUX_AUDIO_MCLK>;
+		clock-names = "mclk";
+	};
 };
