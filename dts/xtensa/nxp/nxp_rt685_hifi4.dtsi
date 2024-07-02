@@ -76,7 +76,14 @@
 
 			#address-cells = <1>;
 			#size-cells = <1>;
-			
+
+			clkctl0: clkctl@1000 {
+				/* FIXME This chip does NOT have a syscon */
+				compatible = "nxp,lpc-syscon";
+				reg = <0x1000 0x1000>;
+				#clock-cells = <1>;
+			};
+
 			gpio: gpio@100000 {
 				reg = <0x100000 0x1000>;
 				
@@ -114,7 +121,7 @@
 				interrupt-controller;
 				#interrupt-cells = <1>;
 				#address-cells = <0>;
-				interrupts = <6 0 0>, <7 0 0>;
+				interrupts = <5 0 0>, <7 0 0>;
 				num-lines = <8>;
 				num-inputs = <64>;
 			};
@@ -133,11 +140,49 @@
 				#clock-cells = <1>;
 			};
 
+			dma1: dma-controller@105000 {
+				compatible = "nxp,lpc-dma";
+				reg = <0x105000 0x1000>;
+				interrupts = <6 0 0>;
+				dma-channels = <33>;
+				status = "disabled";
+				#dma-cells = <1>;
+			};
+
+			i3c0: i3c@36000 {
+				compatible = "nxp,mcux-i3c";
+				reg = <0x36000 0x1000>;
+				#address-cells = <3>;
+				#size-cells = <0>;
+				interrupts = <8 0 0>;
+				clocks = <&clkctl1 MCUX_I3C_CLK>;
+				clk-divider = <2>;
+				clk-divider-slow = <1>;
+				clk-divider-tc = <1>;
+				status = "disabled";
+			};
+
 			flexcomm0: flexcomm@106000 {
 				compatible = "nxp,lpc-flexcomm";
 				reg = <0x106000 0x1000>;
 				clocks = <&clkctl1 MCUX_FLEXCOMM0_CLK>;
-				interrupts = <5 0 0>;
+				interrupts = <12 0 0>;
+				status = "disabled";
+			};
+
+			flexcomm1: flexcomm@107000 {
+				compatible = "nxp,lpc-flexcomm";
+				reg = <0x107000 0x1000>;
+				interrupts = <10 0 0>;
+				clocks = <&clkctl1 MCUX_FLEXCOMM1_CLK>;
+				status = "disabled";
+			};
+
+			flexcomm3: flexcomm@109000 {
+				compatible = "nxp,lpc-flexcomm";
+				reg = <0x109000 0x1000>;
+				interrupts = <11 0 0>;
+				clocks = <&clkctl1 MCUX_FLEXCOMM3_CLK>;
 				status = "disabled";
 			};
 
@@ -159,12 +204,12 @@
 				 */
 				dsp_int5 {
 					selector = <0>;
-					source = <MUX_FLEXCOMM0_TO_DSP_INTERRUPT>;
+					source = <MUX_GPIO_INT0_TO_DSP_INTERRUPT>;
 				};
 
 				dsp_int6 {
 					selector = <1>;
-					source = <MUX_GPIO_INT0_TO_DSP_INTERRUPT>;
+					source = <MUX_DMAC1_TO_DSP_INTERRUPT>;
 				};
 
 				dsp_int7 {
@@ -174,7 +219,27 @@
 
 				dsp_int8 {
 					selector = <3>;
+					source = <MUX_I3C0_TO_DSP_INTERRUPT>;
+				};
+
+				dsp_int9 {
+					selector = <4>;
 					source = <MUX_MU_BTO_DSP_INTERRUPT>;
+				};
+
+				dsp_int10 {
+					selector = <5>;
+					source = <MUX_FLEXCOMM1_TO_DSP_INTERRUPT>;
+				};
+
+				dsp_int11 {
+					selector = <6>;
+					source = <MUX_FLEXCOMM3_TO_DSP_INTERRUPT>;
+				};
+
+				dsp_int12 {
+					selector = <7>;
+					source = <MUX_FLEXCOMM0_TO_DSP_INTERRUPT>;
 				};
 			};
 
@@ -184,7 +249,7 @@
 				compatible = "nxp,mbox-imx-mu";
 				reg = <0x111000 0x1000>;
 				
-				interrupts = <8 0 0>;
+				interrupts = <9 0 0>;
 				rx-channels = <4>;
 				
 				status = "disabled";
