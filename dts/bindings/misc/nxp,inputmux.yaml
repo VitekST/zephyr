@@ -1,0 +1,25 @@
+# Copyright (c) 2024 NXP
+# SPDX-License-Identifier: Apache-2.0
+
+include: [base.yaml]
+
+compatible: "nxp,inputmux"
+description: NXP i.MX INPUTMUX driver. Routes internal SoC signals.
+
+properties:
+  reg:
+    required: true
+
+child-binding:
+  description: INPUTMUX assignment
+
+  properties:
+    selector:
+      type: int
+      description: Multiplexer selector.
+    source:
+      type: int
+      description: Multiplexer source.
+    signal:
+      type: int
+      description: Signal to configure.
