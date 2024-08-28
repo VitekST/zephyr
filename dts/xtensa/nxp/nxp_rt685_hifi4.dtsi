@@ -6,6 +6,7 @@
 #include <xtensa/xtensa.dtsi>
 #include <mem.h>
 #include <zephyr/dt-bindings/clock/mcux_lpc_syscon_clock.h>
+#include <zephyr/dt-bindings/inputmux/nxp_inputmux_rt6xx.h>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
@@ -25,6 +26,21 @@
 	};
 
 	soc {
+		interrupt-parent = <&core_intc>;
+
+		/*
+		 * Dummy interrupt controller node - IRQs are handled directly by soc.c if
+		 * building for the RT685 DSP.
+		 *
+		 * Be sure to configure the inputmux node for appropriate interrupt routing.
+		 */
+		core_intc: core_intc@0 {
+			compatible = "cdns,xtensa-core-intc";
+			reg = <0x00 0x400>;
+			interrupt-controller;
+			#interrupt-cells = <3>;
+		};
+
 		itcm: memory@24020000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
@@ -52,6 +68,45 @@
 
 			adsp_data: memory@24000000 {
 				reg = <0x24000000 DT_SIZE_K(64)>;
+			};
+		};
+
+		peripheral: peripheral@40000000 {
+			ranges = <0x0 0x40000000 0x10000000>;
+
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			inputmux: inputmux@26000 {
+				compatible = "nxp,inputmux";
+				reg = <0x26000 0x2000>;
+				status = "okay";
+
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				/*
+				 * INPUTMUX interrupt multiplexing - interrupts coming to the
+				 * HiFi4 DSP are multiplexed (dynamically routed) rather than
+				 * statically wired in the silicon.
+				 *
+				 * Physical IRQ number also determines its priority - see
+				 * Table 1460 of UM11147 (RT6xx User manual).
+				 */
+				dsp_int5 {
+					selector = <0>;
+					source = <MUX_FLEXCOMM0_TO_DSP_INTERRUPT>;
+				};
+
+				dsp_int6 {
+					selector = <1>;
+					source = <MUX_GPIO_INT0_TO_DSP_INTERRUPT>;
+				};
+
+				dsp_int7 {
+					selector = <2>;
+					source = <MUX_GPIO_INT1_TO_DSP_INTERRUPT>;
+				};
 			};
 		};
 	};
